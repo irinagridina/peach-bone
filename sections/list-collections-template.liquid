@@ -1,61 +1,56 @@
-<div data-section-id="{{ section.id }}" data-section-type="list-collection-template">
+{% comment %}
 
-{% assign header_title = page_title %}
-{% include 'page_header' with header_title %}
+  This page represents the /collections and /products pages.
 
-<div class="wrapper wrapper--margins">
+  More info:
+    - http://docs.shopify.com/manual/configuration/store-customization/taking-control-of-collections-listing
 
-  <div class="collection-list grid-uniform small-gutter">
-    {% case section.settings.grid %}
-      {% when '2' %}
-        {%- assign grid_item_width = 'small--one-whole medium--one-half large--one-half' -%}
-      {% when '3' %}
-        {%- assign grid_item_width = 'small--one-whole medium--one-third large--one-third' -%}
-      {% when '4' %}
-        {%- assign grid_item_width = 'small--one-half medium--one-quarter large--one-quarter' -%}
-      {% when '5' %}
-        {%- assign grid_item_width = 'small--one-half medium--one-third large--one-fifth' -%}
+{% endcomment %}
+
+{% comment %}
+  Loop through each collection, except 'frontpage'
+{% endcomment %}
+
+{% assign collection_count = 0 %}
+{% for collection in collections %}
+  {% unless collection.handle == 'frontpage' %}
+    {% assign collection_count = collection_count | plus:1 %}
+  {% endunless %}
+{% endfor %}
+
+{% comment %}
+  Set grid item widths based on settings
+{% endcomment %}
+
+{% include 'product-grid-width' with product_image_type: section.settings.collection_image_type, product_image_size: section.settings.collection_image_size %}
+
+<div class="grid grid--no-gutters collection-grid">
+  {% if section.settings.display_type == 'all' %}
+    {% case section.settings.sort %}
+      {% when 'products_high' or 'products_low' %}
+        {%- assign collections = collections | sort: 'all_products_count' -%}
+      {% when 'date' or 'date_reversed' %}
+        {%- assign collections = collections | sort: 'published_at' -%}
     {% endcase %}
-
-    {% unless grid_item_width %}
-      {%- assign grid_item_width = 'one-third medium--one-half small--one-whole' -%}
-    {% endunless %}
-
-    {% if section.settings.display_type == 'all' %}
-      {% case section.settings.sort %}
-        {% when 'products_high' or 'products_low' %}
-          {%- assign list_collections = collections | sort: 'all_products_count' -%}
-        {% when 'date' or 'date_reversed' %}
-          {%- assign list_collections = collections | sort: 'published_at' -%}
-        {% else %}
-          {%- assign list_collections = collections -%}
-      {% endcase %}
-      {% if section.settings.sort == 'products_low' or section.settings.sort == 'date' or section.settings.sort == 'alphabetical' %}
-        {% for collection in list_collections %}
+    {% if section.settings.sort == 'products_low' or section.settings.sort == 'date' or section.settings.sort == 'alphabetical' %}
+      {% for collection in collections %}
         {% unless collection.handle == 'frontpage' %}
           {% include 'collection-grid-item' %}
         {% endunless %}
-        {% endfor %}
-      {% else %}
-        {% for collection in list_collections reversed %}
-          {% unless collection.handle == 'frontpage' %}
-            {% include 'collection-grid-item' %}
-          {% endunless %}
-        {% endfor %}
-      {% endif %}
+      {% endfor %}
     {% else %}
-      {% for block in section.blocks %}
-        {%- assign collection = collections[block.settings.collection] -%}
+      {% for collection in collections reversed %}
         {% unless collection.handle == 'frontpage' %}
           {% include 'collection-grid-item' %}
         {% endunless %}
       {% endfor %}
     {% endif %}
-
-  </div>
-
-</div>
-
+  {% else %}
+    {% for block in section.blocks %}
+      {%- assign collection = collections[block.settings.collection] -%}
+      {% include 'collection-grid-item' %}
+    {% endfor %}
+  {% endif %}
 </div>
 
 
@@ -63,9 +58,9 @@
 {% schema %}
 {
   "name": {
-    "de": "Kategorieseiten",
+    "de": "Kategorien-Liste Seite",
     "en": "Collections list page",
-    "es": "Lista de colecciones",
+    "es": "Pág lista de colecciones",
     "fr": "Liste des collections",
     "it": "Elenco collezioni",
     "ja": "コレクションリストのページ",
@@ -198,7 +193,7 @@
         {
           "value": "date",
           "label": {
-            "de": "Datum: alt bis neu",
+            "de": "Datum, alt zu neu",
             "en": "Date, old to new",
             "es": "Fecha: antiguo(a) a reciente",
             "fr": "Date, de la plus ancienne à la plus récente",
@@ -210,11 +205,11 @@
         {
           "value": "date_reversed",
           "label": {
-            "de": "Datum: neu bis alt",
+            "de": "Datum, neu zu alt",
             "en": "Date, new to old",
             "es": "Fecha: reciente a antiguo(a)",
             "fr": "Date, de la plus récente à la plus ancienne",
-            "it": "Data, dal più al meno recente",
+            "it": "Data, dal più recente al più vecchio",
             "ja": "新着順",
             "pt-BR": "Data, mais recente primeiro"
           }
@@ -223,64 +218,103 @@
     },
     {
       "type": "select",
-      "id": "grid",
+      "id": "collection_image_type",
       "label": {
-        "de": "Kategorien per Reihe",
-        "en": "Collections per row",
-        "es": "Colecciones por fila",
-        "fr": "Collections par rangée",
-        "it": "Collezioni per riga",
-        "ja": "行あたりのコレクション数",
-        "pt-BR": "Coleções por linha"
+        "de": "Bildstil",
+        "en": "Image style",
+        "es": "Estilo de imagen",
+        "fr": "Style d'image",
+        "it": "Stile immagine",
+        "ja": "画像スタイル",
+        "pt-BR": "Estilo da imagem"
       },
-      "default": "3",
       "options": [
         {
-          "value": "2",
+          "value": "portrait",
           "label": {
-            "de": "2",
-            "en": "2",
-            "es": "2",
-            "fr": "2",
-            "it": "2",
-            "ja": "2",
-            "pt-BR": "2"
+            "de": "Hoch/Quadrat",
+            "en": "Tall/square",
+            "es": "Alta/cuadrada",
+            "fr": "Grand/carré",
+            "it": "Verticale/quadrata",
+            "ja": "縦長/正方形",
+            "pt-BR": "Alto/quadrado"
           }
         },
         {
-          "value": "3",
+          "value": "landscape",
           "label": {
-            "de": "3",
-            "en": "3",
-            "es": "3",
-            "fr": "3",
-            "it": "3",
-            "ja": "3",
-            "pt-BR": "3"
+            "de": "Breit",
+            "en": "Wide",
+            "es": "Ancho",
+            "fr": "Large",
+            "it": "Orizzontale",
+            "ja": "横長",
+            "pt-BR": "Grande"
+          }
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "collection_image_size",
+      "label": {
+        "de": "Foto-Größe",
+        "en": "Image size",
+        "es": "Tamaño de la imagen",
+        "fr": "Taille de l'image",
+        "it": "Dimensione immagine",
+        "ja": "画像のサイズ",
+        "pt-BR": "Tamanho da imagem"
+      },
+      "default": "medium",
+      "options": [
+        {
+          "value": "small",
+          "label": {
+            "de": "Klein",
+            "en": "Small",
+            "es": "Pequeña",
+            "fr": "Petite",
+            "it": "Small",
+            "ja": "小",
+            "pt-BR": "Pequeno"
           }
         },
         {
-          "value": "4",
+          "value": "medium",
           "label": {
-            "de": "4",
-            "en": "4",
-            "es": "4",
-            "fr": "4",
-            "it": "4",
-            "ja": "4",
-            "pt-BR": "4"
+            "de": "Mitte",
+            "en": "Medium",
+            "es": "Mediana",
+            "fr": "Moyenne",
+            "it": "Medium",
+            "ja": "中",
+            "pt-BR": "Médio"
           }
         },
         {
-          "value": "5",
+          "value": "large",
           "label": {
-            "de": "5",
-            "en": "5",
-            "es": "5",
-            "fr": "5",
-            "it": "5",
-            "ja": "5",
-            "pt-BR": "5"
+            "de": "Groß",
+            "en": "Large",
+            "es": "Grande",
+            "fr": "Grande",
+            "it": "Large",
+            "ja": "大",
+            "pt-BR": "Grande"
+          }
+        },
+        {
+          "value": "xlarge",
+          "label": {
+            "de": "Extra groß",
+            "en": "Extra large",
+            "es": "Extra grande",
+            "fr": "Très grande",
+            "it": "Extra large",
+            "ja": "特大",
+            "pt-BR": "Extra grande"
           }
         }
       ]
