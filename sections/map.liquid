@@ -16,9 +16,9 @@
   }
 </style>
 
-<div class="index-section map-section{% if display_map %} map-section--display-map{% endif %}" data-section-id="{{ section.id }}" data-section-type="map-section" data-api-key="{{ section.settings.api_key }}">
-  <div class="map-section__wrapper">
-    <div class="wrapper map-section__content-wrapper">
+<div class="map-section{% if display_map %} map-section--display-map{% endif %}" data-section-id="{{ section.id }}" data-section-type="map-section" data-api-key="{{ section.settings.api_key }}">
+  <div class="page-width map-section__wrapper">
+    <div class="map-section__content-wrapper">
       <div class="map-section__overlay">
         {% if section.settings.map_title != blank %}
           <h4 class="h1--mini">{{ section.settings.map_title | escape }}</h4>
@@ -26,11 +26,11 @@
         {% if section.settings.address != blank %}
           <div class="rte-setting">{{ section.settings.address }}</div>
           {% if section.settings.button != blank and section.settings.map_address != blank %}
-            <a href="https://maps.google.com?daddr={{ section.settings.map_address | escape }}" class="btn btn--outline btn--small btn--dark" target="_blank">
+            <a href="https://maps.google.com?daddr={{ section.settings.map_address | escape }}" class="btn" target="_blank">
               {% if section.settings.show_pin %}
-                <span class="icon-pin" aria-hidden="true">{% include 'asset_svg' with 'pin' %}</span>
+                <span class="icon icon-pin" aria-hidden="true"></span>
               {% endif %}
-              {{ section.settings.button | escape }}
+                <span>{{ section.settings.button | escape }}</span>
             </a>
           {% endif %}
         {% endif %}
@@ -49,14 +49,14 @@
         </noscript>
       {% else %}
         <div class="map-section__image">
-          {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg' }}
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg icon--placeholder' }}
         </div>
       {% endif %}
       {% if display_map %}
         <div class="map-section__container"
              id="Map-{{ section.id }}"
              data-address-setting="{{ section.settings.map_address | escape }}"
-             data-marker-color="{{ settings.color_primary }}">
+             data-marker-color="{{ settings.color_button_bg }}">
         </div>
       {% endif %}
     </div>
@@ -76,6 +76,7 @@
     "ja": "マップ",
     "pt-BR": "Mapa"
   },
+  "class": "index-section map",
   "settings": [
     {
       "id": "map_title",
