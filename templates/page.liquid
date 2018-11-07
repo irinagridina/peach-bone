@@ -1,10 +1,8 @@
-<!-- /templates/page.liquid -->
+{% assign header_title = page.title %}
+{% include 'page_header' with header_title %}
 
-<div class="page-width page-container">
-  <header>
-    <h1>{{ page.title }}</h1>
-  </header>
-  <div class="rte rte--indented-images">
+<div class="wrapper wrapper--margins wrapper__article">
+  <div class="rte">
     {{ page.content }}
   </div>
 </div>
